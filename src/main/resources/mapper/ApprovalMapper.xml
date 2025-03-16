@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.approval.mapper.ApprovalMapper">
+
+    <!-- 양식 리스트 조회 -->
+    <select id="selectTemList" resultType="TemplateResponseDto">
+        SELECT 
+            TEM.comp_id,
+            COM.comp_nm,
+            TEM.dept_id,
+            DEP.dept_nm,
+            TEM.tem_id,
+            TEM.tem_nm,
+            TEM.tem_description,
+            TEM.tem_contents,
+            TEM.tem_status,
+            TEM.create_id,
+            USERS2.user_nm AS create_nm,
+            TEM.create_comp_id,
+            COM2.comp_nm AS create_comp_nm,
+            TEM.create_dept_id,
+            DEP2.dept_nm AS create_dept_nm,
+            TEM.create_dt,
+            TEM.update_id,
+            USERS3.user_nm AS update_nm,
+            TEM.update_comp_id,
+            COM3.comp_nm AS update_comp_nm,
+            TEM.update_dept_id,
+            DEP3.dept_nm AS update_dept_nm,
+            TEM.update_dt
+        FROM templates TEM
+        JOIN company COM ON TEM.comp_id = COM.comp_id
+        JOIN company COM2 ON TEM.create_comp_id = COM2.comp_id
+        LEFT JOIN company COM3 ON TEM.update_comp_id = COM3.comp_id
+        JOIN department DEP ON TEM.comp_id = DEP.comp_id AND TEM.dept_id = DEP.dept_id
+        JOIN department DEP2 ON TEM.comp_id = DEP2.comp_id AND TEM.create_dept_id = DEP2.dept_id
+        LEFT JOIN department DEP3 ON TEM.comp_id = DEP3.comp_id AND TEM.update_dept_id = DEP3.dept_id
+        JOIN users USERS2 ON TEM.create_id = USERS2.user_id
+        LEFT JOIN users USERS3 ON TEM.update_id = USERS3.user_id
+        WHERE 1=1
+            <if test="temId != null">
+            AND TEM.tem_id = #{temId}
+            </if>
+            <if test="compId != null">
+            AND COM.comp_id = #{compId}
+            </if>
+            <if test="deptId != null">
+            AND DEP.dept_id = #{deptId}
+            </if>
+            <if test="searchKeyword != null and searchKeyword != ''">
+            <choose>
+                <when test="searchType == 0">
+                    AND TEM.tem_nm LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchType == 1">
+                    AND TEM.tem_description LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchType == 2">
+                    AND TEM.tem_contents LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchType == 3">
+                    AND (
+                        TEM.tem_nm LIKE CONCAT('%', #{searchKeyword}, '%')
+                        OR TEM.tem_description LIKE CONCAT('%', #{searchKeyword}, '%')
+                    )
+                </when>
+                <otherwise>
+                    AND (
+                        TEM.tem_nm LIKE CONCAT('%', #{searchKeyword}, '%')
+                        OR TEM.tem_description LIKE CONCAT('%', #{searchKeyword}, '%')
+                        OR TEM.tem_contents LIKE CONCAT('%', #{searchKeyword}, '%')
+                    )
+                </otherwise>
+            </choose>
+            </if>
+            <if test="temStatus != null">
+            AND TEM.tem_status = #{temStatus}
+            </if>
+        ORDER BY COM.comp_nm, DEP.dept_nm, TEM.tem_nm
+        LIMIT #{pageSize} OFFSET #{pageNum}
+    </select>
+
+    <!-- 양식 생성 -->
+    <insert id="insertTem">
+        INSERT INTO templates (
+            comp_id, 
+            dept_id, 
+            tem_nm, 
+            tem_description, 
+            tem_contents, 
+            tem_status, 
+            create_id, 
+            create_comp_id, 
+            create_dept_id, 
+            create_dt
+        )
+        VALUES
+        (
+            #{compId}, 
+            #{deptId}, 
+            #{temNm},
+            #{temDescription},
+            #{temContents},
+            #{temStatus},
+            #{createId}, 
+            #{compId}, 
+            #{deptId}, 
+            #{createDt}
+        )
+    </insert>
+
+    <!-- 양식 수정 -->
+    <update id="updateTem">
+        UPDATE templates
+        SET comp_id = #{compId},
+            dept_id = #{deptId},
+            tem_nm = #{temNm},
+            tem_description = #{temDescription},
+            tem_contents = #{temContents},
+            tem_status = #{temStatus},
+            update_id = #{updateId}, 
+            update_comp_id = #{updateCompId}, 
+            update_dept_id = #{updateDeptId}, 
+            update_dt = #{updateDt}
+        WHERE 1=1
+            AND tem_id = #{temId}
+    </update>
+
+    <!-- 양식 삭제 -->
+    <delete id="deleteTem">
+        DELETE FROM templates
+        WHERE tem_id = #{temId}
+    </delete>
+
+    <!-- 문서 리스트 조회 -->
+    <select id="getDocList" resultType="DocumentResponseDto">
+        SELECT 
+            doc_id,                 -- 문서 고유 아이디
+            doc_title,              -- 문서 제목
+            doc_contents,           -- 문서 내용
+            doc_status,             -- 문서 결재 상태 ( 000:임시저장 / 100:결재중 / 200:결재완료 / 400:결재반려 / 800:문서삭제 )
+            create_id,              -- 문서 생성자 아이디
+            create_dt,              -- 문서 생성일
+            comp_id,                -- 문서 생성자 소속 회사
+            comp_nm,                -- 문서 생성자 소속 회사 이름
+            dept_id,                -- 문서 생성자 소속 부서
+            dept_nm,                -- 문서 생성자 소속 부서 이름
+            doc_secret              -- 보안문서 여부 ( 0:일반문서 / 1:보안문서 )
+        FROM documents DOC
+        JOIN 
+        WHERE 
+            <if test="docId != null">
+            doc_id = #{docId}
+            </if>
+            <if test="docTitle != null">
+            doc_Title = #{docTitle}
+            </if>
+            <if test="pageNum != null">
+            doc_id = #{pageNum}
+            </if>
+            <if test="pageSize != null">
+            doc_id = #{pageSize}
+            </if>
+    </select>
+
+</mapper>

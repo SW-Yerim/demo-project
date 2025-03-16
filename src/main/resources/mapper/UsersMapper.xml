@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.common.mapper.UsersMapper">
+
+    <select id="selectUsersList" resultType="UsersResponseDto">
+        SELECT
+            U.comp_id,
+            COM.comp_nm,
+            U.dept_id,
+            DEP.dept_nm,
+            U.user_id,
+            U.user_nm,
+            U.rank_id,
+            U.user_email,
+            U.user_dt,
+            U.user_role,
+            U.user_status
+        FROM users U
+        JOIN company COM on U.comp_id = COM.comp_id
+        JOIN department DEP on U.dept_id = DEP.dept_id AND COM.comp_id = DEP.comp_id
+        WHERE 1=1
+            <if test="compId != null">
+            AND U.comp_id = #{compId}
+            </if>
+            <if test="deptId != null">
+            AND U.dept_id = #{deptId}
+            </if>
+            <if test="userId != null">
+            AND U.user_id = #{userId}
+            </if>
+    </select>
+
+</mapper>

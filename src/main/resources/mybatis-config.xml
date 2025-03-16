@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD MyBatis Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!-- 설정 가능한 기타 옵션들 -->
+    <settings>
+    	<!-- snake to camel -->
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- 쿼리 결과가 null인 경우 누락되지 않도록 -->
+		<setting name="callSettersOnNulls" value="true"/>
+        <!-- 쿼리에 보내는 파라미터가 null인 경우 에러 발생 방지 -->
+		<setting name="jdbcTypeForNull" value="NULL"/>
+    </settings>
+
+    <!-- TypeAliases -->
+    <typeAliases>
+        <!-- 사용자 관련된 alias -->
+        <typeAlias type="com.example.demo.common.dto.UsersResponseDto" alias="UsersResponseDto"/>
+
+        <!-- 전자결재 관련된 alias -->
+        <typeAlias type="com.example.demo.approval.dto.TemplateResponseDto" alias="TemplateResponseDto"/>
+        <typeAlias type="com.example.demo.approval.dto.DocumentResponseDto" alias="DocumentResponseDto"/>
+    </typeAliases>
+
+    <!-- Mapper Locations -->
+    <mappers>
+        <mapper resource="mapper/UsersMapper.xml"/>
+        <mapper resource="mapper/ApprovalMapper.xml"/>
+    </mappers>
+
+</configuration>
